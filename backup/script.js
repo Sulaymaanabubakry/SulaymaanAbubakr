@@ -9,11 +9,24 @@ AOS.init({
 });
 
 // ===================================
+// Navigation Scroll Effect
+// ===================================
+const navbar = document.getElementById('navbar');
+const navLinks = document.querySelectorAll('.nav-link');
+
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+    } else {
+        navbar.classList.remove('scrolled');
+    }
+});
+
+// ===================================
 // Mobile Menu Toggle
 // ===================================
 const hamburger = document.getElementById('hamburger');
 const navMenu = document.getElementById('navMenu');
-const navLinks = document.querySelectorAll('.nav-link');
 
 hamburger.addEventListener('click', () => {
     navMenu.classList.toggle('active');
@@ -46,7 +59,7 @@ navLinks.forEach(link => {
         if (targetId.startsWith('#')) {
             const targetSection = document.querySelector(targetId);
             if (targetSection) {
-                const offsetTop = targetSection.offsetTop - 70;
+                const offsetTop = targetSection.offsetTop - 80;
                 window.scrollTo({
                     top: offsetTop,
                     behavior: 'smooth'
@@ -80,6 +93,63 @@ function highlightNavLink() {
 }
 
 window.addEventListener('scroll', highlightNavLink);
+
+// ===================================
+// Animated Counter for Stats
+// ===================================
+const statNumbers = document.querySelectorAll('.stat-number');
+let counterAnimated = false;
+
+function animateCounters() {
+    const aboutSection = document.getElementById('about');
+    const aboutPosition = aboutSection.getBoundingClientRect().top;
+    const screenPosition = window.innerHeight;
+    
+    if (aboutPosition < screenPosition && !counterAnimated) {
+        statNumbers.forEach(stat => {
+            const target = parseInt(stat.getAttribute('data-target'));
+            const increment = target / 50;
+            let current = 0;
+            
+            const updateCounter = () => {
+                current += increment;
+                if (current < target) {
+                    stat.textContent = Math.ceil(current) + '+';
+                    setTimeout(updateCounter, 30);
+                } else {
+                    stat.textContent = target + '+';
+                }
+            };
+            
+            updateCounter();
+        });
+        counterAnimated = true;
+    }
+}
+
+window.addEventListener('scroll', animateCounters);
+
+// ===================================
+// Skill Bar Animation
+// ===================================
+const skillBars = document.querySelectorAll('.skill-progress');
+let skillsAnimated = false;
+
+function animateSkills() {
+    const aboutSection = document.getElementById('about');
+    const aboutPosition = aboutSection.getBoundingClientRect().top;
+    const screenPosition = window.innerHeight;
+    
+    if (aboutPosition < screenPosition && !skillsAnimated) {
+        skillBars.forEach(bar => {
+            const progress = bar.getAttribute('data-progress');
+            bar.style.width = progress + '%';
+        });
+        skillsAnimated = true;
+    }
+}
+
+window.addEventListener('scroll', animateSkills);
 
 // ===================================
 // Scroll to Top Button
@@ -176,8 +246,22 @@ if (newsletterForm) {
         
         // Reset form
         newsletterForm.reset();
+        
+        // In production, you would send this to your backend
     });
 }
+
+// ===================================
+// Parallax Effect for Hero Background
+// ===================================
+window.addEventListener('scroll', () => {
+    const scrolled = window.pageYOffset;
+    const heroBackground = document.querySelector('.hero-background');
+    
+    if (heroBackground) {
+        heroBackground.style.transform = `translateY(${scrolled * 0.5}px)`;
+    }
+});
 
 // ===================================
 // Dynamic Year in Footer
@@ -187,6 +271,95 @@ const footerText = document.querySelector('.footer-bottom p');
 if (footerText) {
     footerText.textContent = `© ${currentYear} Sulaymaan O. Abubakr. All rights reserved.`;
 }
+
+// ===================================
+// Lazy Loading for Images
+// ===================================
+if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src || img.src;
+                img.classList.add('loaded');
+                observer.unobserve(img);
+            }
+        });
+    });
+    
+    const images = document.querySelectorAll('img[data-src]');
+    images.forEach(img => imageObserver.observe(img));
+}
+
+// ===================================
+// Typing Effect for Hero Subtitle (Optional)
+// ===================================
+function typeWriter(element, text, speed = 100) {
+    let i = 0;
+    element.textContent = '';
+    
+    function type() {
+        if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+        }
+    }
+    
+    type();
+}
+
+// Uncomment to enable typing effect
+// const heroSubtitle = document.querySelector('.hero-subtitle');
+// if (heroSubtitle) {
+//     const originalText = heroSubtitle.textContent;
+//     typeWriter(heroSubtitle, originalText, 50);
+// }
+
+// ===================================
+// Cursor Trail Effect (Optional Premium Feature)
+// ===================================
+const createCursorTrail = () => {
+    const coords = { x: 0, y: 0 };
+    const circles = document.querySelectorAll('.cursor-circle');
+    
+    if (circles.length === 0) return;
+    
+    circles.forEach((circle, index) => {
+        circle.x = 0;
+        circle.y = 0;
+    });
+    
+    window.addEventListener('mousemove', (e) => {
+        coords.x = e.clientX;
+        coords.y = e.clientY;
+    });
+    
+    function animateCircles() {
+        let x = coords.x;
+        let y = coords.y;
+        
+        circles.forEach((circle, index) => {
+            circle.style.left = x - 12 + 'px';
+            circle.style.top = y - 12 + 'px';
+            circle.style.transform = `scale(${(circles.length - index) / circles.length})`;
+            
+            circle.x = x;
+            circle.y = y;
+            
+            const nextCircle = circles[index + 1] || circles[0];
+            x += (nextCircle.x - x) * 0.3;
+            y += (nextCircle.y - y) * 0.3;
+        });
+        
+        requestAnimationFrame(animateCircles);
+    }
+    
+    animateCircles();
+};
+
+// Uncomment to enable cursor trail
+// createCursorTrail();
 
 // ===================================
 // Page Load Animation
@@ -207,6 +380,6 @@ document.querySelectorAll('a[href="#"]').forEach(link => {
 // ===================================
 // Console Welcome Message
 // ===================================
-console.log('%c👋 Welcome to Sulaymaan O. Abubakr\'s Portfolio!', 'color: #003d82; font-size: 20px; font-weight: bold;');
-console.log('%cInterested in working together? Let\'s connect!', 'color: #e63946; font-size: 14px;');
-console.log('%cEmail: sulaymaanabubakr@gmail.com', 'color: #4a5568; font-size: 12px;');
+console.log('%c👋 Welcome to Sulaymaan O. Abubakr\'s Portfolio!', 'color: #0066ff; font-size: 20px; font-weight: bold;');
+console.log('%cInterested in working together? Let\'s connect!', 'color: #00d4ff; font-size: 14px;');
+console.log('%cEmail: sulaymaanabubakr@gmail.com', 'color: #a0a0b0; font-size: 12px;');
